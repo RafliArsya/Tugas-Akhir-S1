@@ -13,20 +13,28 @@ import java.io.*
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
-
+import android.widget.RadioButton
+import android.widget.RadioGroup
+/*import android.widget.Toast
+import android.view.View*/
 
 class MainActivity : AppCompatActivity() {
-    var btn1: Button? = null
-    var btn2: Button? = null
-    var txtv1: TextView? = null
-    var txt1: EditText? = null
-    var location = ""
-    val requestcode = 111
-    var net_text_data = ""
+    private var btn1: Button? = null
+    private var btn2: Button? = null
+    private var txtv1: TextView? = null
+    private var txt1: EditText? = null
+    private var location = ""
+    private val requestcode = 111
+    private var nettextdata = ""
+    private var radioGroup: RadioGroup? = null
+    private var radioButton: RadioButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        radioGroup = findViewById(R.id.radiogroup1)
+
         txtv1 = findViewById(R.id.textInputEditText)
         txt1 = findViewById(R.id.editTextTextMultiLine)
         btn1 = findViewById(R.id.button)
@@ -41,6 +49,15 @@ class MainActivity : AppCompatActivity() {
             readcsv()
         }
     }
+
+    /*fun checkradio(v: View?) {
+        val radioId = radioGroup!!.checkedRadioButtonId
+        radioButton = findViewById(radioId)
+        Toast.makeText(
+            this, "Selected Radio Button: " + radioId.toString(),
+            Toast.LENGTH_SHORT
+        ).show()
+    }*/
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -67,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun readcsv() {
+    private fun readcsv() {
         if (location != "") {
             // If you have access to the external storage, do whatever you need
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
@@ -110,18 +127,31 @@ class MainActivity : AppCompatActivity() {
             var last_lac = ""
             var last_cid = ""
 
-            var strsim1= ""
-            var strsim2= ""
-            var strsim3= ""
-            var strsim4= ""
+            var strsim1: String
+            var strsim2: String
+            var strsim3: String
+            var strsim4: String
             var strout = ""
 
+            val radioId = radioGroup!!.checkedRadioButtonId
+            var separator: String
+
+            when(radioId){
+                R.id.radio_slash -> separator = "/"
+                R.id.radio_comma -> separator = ","
+                else -> {
+                    separator = "/"
+                    radioButton = findViewById(R.id.radio_slash)
+                    radioButton!!.isChecked = true
+                }
+            }
+
             var duplicate = false
-            var count = 0
-            var alllinez = allline.subList(1,allline.lastIndex)
+            var count = 0 //dev only
+            val alllinez = allline.subList(1,allline.lastIndex)
             for (perline in alllinez) {
-                count += 1
-                var simnum: Int = 0
+                count += 1 //dev only
+                var simnum: Int
                 if (perline.isEmpty()) {
                     continue
                 }
@@ -129,43 +159,42 @@ class MainActivity : AppCompatActivity() {
                     continue
                 }
 
-                    var splitted = perline.split(",").toTypedArray()
-                    mcc = splitted[0]
-                    net_type = splitted[9]
-                    if (simnum == 0) {
-                        if (mnc1.isEmpty()) {
-                            println("SIM 1 EMPTYYYYYY")
-                            mnc1 = splitted[1]
-                            simnum = 1
-                        }else if (mnc1.isNotEmpty() and (mnc1 == splitted[1])) {
-                            simnum = 1
-                        }else if (mnc2.isEmpty()) {
-                            mnc2 = splitted[1]
-                            simnum = 2
-                        }else if (mnc2.isNotEmpty() and (mnc2 == splitted[1])) {
-                            simnum = 2
-                        }else if (mnc3.isEmpty()) {
-                            mnc3 = splitted[1]
-                            simnum = 3
-                        }else if (mnc3.isNotEmpty() and (mnc3 == splitted[1])) {
-                            simnum = 3
-                        }else if (mnc4.isEmpty()) {
-                            mnc4 = splitted[1]
-                            simnum = 4
-                        }else if (mnc4.isNotEmpty() and (mnc4 == splitted[1])) {
-                            simnum = 4
-                        }else{
-                            continue
-                        }
-                    }
+                val splitted = perline.split(",").toTypedArray()
+                mcc = splitted[0]
+                net_type = splitted[9]
 
-                    if ((last_lac == splitted[2]) and (last_cid == splitted[3])) {
-                        duplicate = true
-                    }
+                if (mnc1.isEmpty() || (mnc1.isNotEmpty() and (mnc1 == splitted[1]))) {
+                    //println("SIM 1 EMPTY")
+                    mnc1 = splitted[1]
+                    simnum = 1
+                }else if (mnc2.isEmpty() || (mnc2.isNotEmpty() and (mnc2 == splitted[1]))) {
+                    mnc2 = splitted[1]
+                    simnum = 2
+                }else if (mnc3.isEmpty() || (mnc3.isNotEmpty() and (mnc3 == splitted[1]))) {
+                    mnc3 = splitted[1]
+                    simnum = 3
+                }else if (mnc4.isEmpty() || (mnc4.isNotEmpty() and (mnc4 == splitted[1]))) {
+                    mnc4 = splitted[1]
+                    simnum = 4
+                }else{
+                    println("Out of Memory Allocation")
+                    continue
+                }
 
-                    if (net_type == "1") {
-                        var strbuff: String
-                        if (simnum == 1) {
+                if ((last_lac == splitted[2]) and (last_cid == splitted[3])) {
+                    duplicate = true
+                }
+
+                if (net_type == "1") {
+                    var strbuff: String
+                    strbuff = when(simnum){
+                        1 -> str4g1
+                        2 -> str4g2
+                        3 -> str4g3
+                        4 -> str4g4
+                        else -> continue
+                    }
+                        /*if (simnum == 1) {
                             strbuff = str4g1
                         } else if (simnum == 2) {
                             strbuff = str4g2
@@ -175,28 +204,35 @@ class MainActivity : AppCompatActivity() {
                             strbuff = str4g4
                         } else {
                             continue
-                        }
+                        }*/
 
-                        var ci = Integer.toHexString((splitted[3].toInt()))
-                        cid = ci.toString().takeLast(2).toLong(radix = 16).toString() // int(ci[-2:],16)
-                        lac = ci.toString().take(ci.toString().length - 2).toLong(radix = 16).toString() // lac=int(ci[:-2],16)
-                        if (strbuff.indexOf(lac)>-1) {
-                            var find1 = strbuff.indexOf(lac)
-                            var strbackupf = strbuff.subSequence(0,find1) // strbuff.takeLast(find1+lac.length).toString()//strbuff[:find1]
-                            var strtemp = strbuff.subSequence(find1, strbuff.length)
-                            var find2 = strtemp.indexOf("\\")
-                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
-                            strtemp2 = strtemp2.toString() + "/" + cid + "\\"
-                            strbuff = strbackupf.toString() + strtemp2
+                    var ci = Integer.toHexString((splitted[3].toInt()))
+                    cid = ci.toString().takeLast(2).toLong(radix = 16).toString() // int(ci[-2:],16)
+                    lac = ci.toString().take(ci.toString().length - 2).toLong(radix = 16).toString() // lac=int(ci[:-2],16)
+                    if (strbuff.indexOf(lac)>-1) {
+                        var find1 = strbuff.indexOf(lac)
+                        var strbackupf = strbuff.subSequence(0,find1) // strbuff.takeLast(find1+lac.length).toString()//strbuff[:find1]
+                        var strtemp = strbuff.subSequence(find1, strbuff.length)
+                        var find2 = strtemp.indexOf("\\")
+                        var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                        strtemp2 = strtemp2.toString() + separator + cid + "\\"
+                        strbuff = strbackupf.toString() + strtemp2
+                    } else {
+                        strbuff = if (strbuff.isNotEmpty()) {
+                            "$strbuff\n   $lac-$cid\\"
                         } else {
-                            if (strbuff.length > 0) {
-                                strbuff = strbuff + "\n   " + lac + "-" + cid + "\\"
-                            } else {
-                                strbuff = "4G:" + lac + "-" + cid + "\\"
-                            }
+                            "4G:$lac-$cid\\"
                         }
+                    }
 
-                        if (simnum == 1) {
+                    when(simnum){
+                        1 -> str4g1 = strbuff
+                        2 -> str4g2 = strbuff
+                        3 -> str4g3 = strbuff
+                        4 -> str4g4 = strbuff
+                        else -> continue
+                    }
+                        /*if (simnum == 1) {
                             str4g1 = strbuff
                         } else if (simnum == 2) {
                             str4g2 = strbuff
@@ -206,18 +242,25 @@ class MainActivity : AppCompatActivity() {
                             str4g4 = strbuff
                         } else {
                             continue
-                        }
+                        }*/
 
-                        last_lac = splitted[2]
-                        last_cid = splitted[3]
-                        println("sim1 =" + str4g1)
+                    last_lac = splitted[2]
+                    last_cid = splitted[3]
+                        /*println("sim1 =" + str4g1)
                         println()
                         println("sim2 =" + str4g2)
                         println()
-                        println("sim3 =" + str4g3)
-                    } else if (net_type == "2") {
-                        var strbuff: String?
-                        if (simnum == 1) {
+                        println("sim3 =" + str4g3)*/
+                } else if (net_type == "2") {
+                    var strbuff: String?
+                    strbuff = when(simnum){
+                        1 -> str3g1
+                        2 -> str3g2
+                        3 -> str3g3
+                        4 -> str3g4
+                        else -> continue
+                    }
+                        /*if (simnum == 1) {
                             strbuff = str3g1
                         } else if (simnum == 2) {
                             strbuff = str3g2
@@ -227,43 +270,51 @@ class MainActivity : AppCompatActivity() {
                             strbuff = str3g4
                         } else {
                             continue
-                        }
+                        }*/
 
-                        lac = splitted[2]
-                        cid = (splitted[3].toInt() % 65536).toString()
-                        if (lac in strbuff) {
-                            var find1 = strbuff.indexOf(lac)
-                            var strbackupf = strbuff.subSequence(0, find1) // strbuff[:find1]
-                            var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
-                            var find2 = strtemp.indexOf("\\")
-                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
-                            strtemp2 = strtemp2.toString() + "/" + cid + "\\"
-                            strbuff = strbackupf.toString() + strtemp2
+                    lac = splitted[2]
+                    cid = (splitted[3].toInt() % 65536).toString()
+                    if (lac in strbuff) {
+                        var find1 = strbuff.indexOf(lac)
+                        var strbackupf = strbuff.subSequence(0, find1) // strbuff[:find1]
+                        var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
+                        var find2 = strtemp.indexOf("\\")
+                        var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                        strtemp2 = strtemp2.toString() + separator + cid + "\\"
+                        strbuff = strbackupf.toString() + strtemp2
+                    } else {
+                        strbuff = if (strbuff.isNotEmpty()) {
+                            "$strbuff\n   $lac-$cid\\"
                         } else {
-                            if (strbuff.length > 0) {
-                                strbuff = strbuff + "\n   " + lac + "-" + cid + "\\"
-                            } else {
-                                strbuff = strbuff + "3G:" + lac + "-" + cid + "\\"
-                            }
+                            strbuff + "3G:" + lac + "-" + cid + "\\"
                         }
+                    }
 
-                        if (simnum == 1) {
-                            str3g1 = strbuff
-                        } else if (simnum == 2) {
-                            str3g2 = strbuff
-                        } else if (simnum == 3) {
-                            str3g3 = strbuff
-                        } else if (simnum == 4) {
-                            str3g4 = strbuff
-                        } else {
-                            continue
-                        }
+                    when(simnum){
+                        1 -> str3g1 = strbuff
+                        2 -> str3g2 = strbuff
+                        3 -> str3g3 = strbuff
+                        4 -> str3g4 = strbuff
+                        else -> continue
+                    }
 
-                        last_lac = splitted[2]
-                        last_cid = splitted[3]
-                    } else if (net_type == "3") {
-                        var strbuff: String?
-                        if (simnum == 1) {
+                    /*if (simnum == 1) {
+                        str3g1 = strbuff
+                    } else if (simnum == 2) {
+                        str3g2 = strbuff
+                    } else if (simnum == 3) {
+                        str3g3 = strbuff
+                    } else if (simnum == 4) {
+                        str3g4 = strbuff
+                    } else {
+                        continue
+                    }*/
+
+                    last_lac = splitted[2]
+                    last_cid = splitted[3]
+                } else if (net_type == "3") {
+                    var strbuff: String?
+                        /*if (simnum == 1) {
                             strbuff = str2g1
                         } else if (simnum == 2) {
                             strbuff = str2g2
@@ -273,28 +324,42 @@ class MainActivity : AppCompatActivity() {
                             strbuff = str2g4
                         } else {
                             continue
-                        }
+                        }*/
+                    strbuff = when(simnum){
+                        1 -> str2g1
+                        2 -> str2g2
+                        3 -> str2g3
+                        4 -> str2g4
+                        else -> continue
+                    }
 
-                        lac = splitted[2]
-                        cid = splitted[3]
-                        if (lac in strbuff) {
-                            var find1 = strbuff.indexOf(lac)
-                            var strbackupf = strbuff.subSequence(0, find1) // [:find1]
-                            var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
-                            var find2 = strtemp.indexOf("\\")
-                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                    lac = splitted[2]
+                    cid = splitted[3]
+                    if (lac in strbuff) {
+                        var find1 = strbuff.indexOf(lac)
+                        var strbackupf = strbuff.subSequence(0, find1) // [:find1]
+                        var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
+                        var find2 = strtemp.indexOf("\\")
+                        var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
                             // strbackupe = strtemp[find2:]
-                            strtemp2 = strtemp2.toString() + "/" + cid + "\\"
-                            strbuff = strbackupf.toString() + strtemp2 // + strbackupe
+                        strtemp2 = strtemp2.toString() + separator + cid + "\\"
+                        strbuff = strbackupf.toString() + strtemp2 // + strbackupe
+                    } else {
+                        strbuff = if (strbuff.isNotEmpty()) {
+                            "$strbuff\n   $lac-$cid\\"
                         } else {
-                            if (strbuff.length > 0) {
-                                strbuff = strbuff + "\n   " + lac + "-" + cid + "\\"
-                            } else {
-                                strbuff = strbuff + "2G:" + lac + "-" + cid + "\\"
-                            }
+                            strbuff + "2G:" + lac + "-" + cid + "\\"
                         }
+                    }
 
-                        if (simnum == 1) {
+                    when(simnum){
+                        1 -> str2g1 = strbuff
+                        2 -> str2g2 = strbuff
+                        3 -> str2g3 = strbuff
+                        4 -> str2g4 = strbuff
+                        else -> continue
+                    }
+                        /*if (simnum == 1) {
                             str2g1 = strbuff
                         } else if (simnum == 2) {
                             str2g2 = strbuff
@@ -304,86 +369,103 @@ class MainActivity : AppCompatActivity() {
                             str2g4 = strbuff
                         } else {
                             continue
-                        }
+                        }*/
 
-                        last_lac = splitted[2]
-                        last_cid = splitted[3]
-                    }
-
+                    last_lac = splitted[2]
+                    last_cid = splitted[3]
+                }
 
             }
 
             if (mnc1.isNotEmpty()) {
                 strsim1 = str4g1 + "\n" + str3g1 + "\n" + str2g1 + "\n"
                 strsim1 = strsim1.replace("\\", "")
-                if (mnc1 == "01") {
-                    strout += "INDOSAT\n"
-                } else if (mnc1 == "10") {
-                    strout += "TELKOMSEL\n"
-                } else if (mnc1 == "11") {
-                    strout += "XL\n"
-                } else if (mnc1 == "89") {
-                    strout += "THREE\n"
+                when (mnc1) {
+                    "01" -> {
+                        strout += "INDOSAT\n"
+                    }
+                    "10" -> {
+                        strout += "TELKOMSEL\n"
+                    }
+                    "11" -> {
+                        strout += "XL\n"
+                    }
+                    "89" -> {
+                        strout += "THREE\n"
+                    }
                 }
-                strout = strout + strsim1
+                strout += strsim1
             }
-            if (mnc2.length > 0) {
+            if (mnc2.isNotEmpty()) {
                 strsim2 = str4g2 + "\n" + str3g2 + "\n" + str2g2 + "\n"
                 strsim2 = strsim2.replace("\\", "")
-                if (mnc2 == "01") {
-                    strout += "INDOSAT\n"
-                } else if (mnc2 == "10") {
-                    strout += "TELKOMSEL\n"
-                } else if (mnc2 == "11") {
-                    strout += "XL\n"
-                } else if (mnc2 == "89") {
-                    strout += "THREE\n"
+                when (mnc2) {
+                    "01" -> {
+                        strout += "INDOSAT\n"
+                    }
+                    "10" -> {
+                        strout += "TELKOMSEL\n"
+                    }
+                    "11" -> {
+                        strout += "XL\n"
+                    }
+                    "89" -> {
+                        strout += "THREE\n"
+                    }
                 }
-                strout = strout + strsim2
+                strout += strsim2
             }
-            if (mnc3.length > 0) {
+            if (mnc3.isNotEmpty()) {
                 strsim3 = str4g3 + "\n" + str3g3 + "\n" + str2g3 + "\n"
                 strsim3 = strsim3.replace("\\", "")
-                if (mnc3 == "01") {
-                    strout += "INDOSAT\n"
-                } else if (mnc3 == "10") {
-                    strout += "TELKOMSEL\n"
-                } else if (mnc3 == "11") {
-                    strout += "XL\n"
-                } else if (mnc3 == "89") {
-                    strout += "THREE\n"
+                when (mnc3) {
+                    "01" -> {
+                        strout += "INDOSAT\n"
+                    }
+                    "10" -> {
+                        strout += "TELKOMSEL\n"
+                    }
+                    "11" -> {
+                        strout += "XL\n"
+                    }
+                    "89" -> {
+                        strout += "THREE\n"
+                    }
                 }
-                strout = strout + strsim3
+                strout += strsim3
             }
-            if (mnc4.length > 0) {
+            if (mnc4.isNotEmpty()) {
                 strsim4 = str4g4 + "\n" + str3g4 + "\n" + str2g4 + "\n"
                 strsim4 = strsim4.replace("\\", "")
-                if (mnc4 == "01") {
-                    strout += "INDOSAT\n"
-                } else if (mnc4 == "10") {
-                    strout += "TELKOMSEL\n"
-                } else if (mnc4 == "11") {
-                    strout += "XL\n"
-                } else if (mnc4 == "89") {
-                    strout += "THREE\n"
+                when (mnc4) {
+                    "01" -> {
+                        strout += "INDOSAT\n"
+                    }
+                    "10" -> {
+                        strout += "TELKOMSEL\n"
+                    }
+                    "11" -> {
+                        strout += "XL\n"
+                    }
+                    "89" -> {
+                        strout += "THREE\n"
+                    }
                 }
-                strout = strout + strsim4
+                strout += strsim4
             }
             if (duplicate) {
-                strout = strout + "!!!Ada duplikasi data!!!"
+                strout += "!!!Ada duplikasi data!!!"
             }
             strout = strout.trim()
             txt1?.setText(strout)
         }
     }
 
-    fun isExternalStorageDocument(uri: Uri): Boolean {
+    private fun isExternalStorageDocument(uri: Uri): Boolean {
         return "com.android.externalstorage.documents" == uri.authority
     }
 
-    fun isLetters(string: String): Boolean {
+    private fun isLetters(string: String): Boolean {
         return string.matches("^[a-zA-Z]*$".toRegex())
     }
-
-    fun String.onlyLetters() = all { it.isLetter() }
 }
