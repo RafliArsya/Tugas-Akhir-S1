@@ -79,6 +79,148 @@
 
         </RadioGroup>
 
+        <RadioGroup
+            android:id="@+id/radiogroup2"
+            android:layout_width="269dp"
+            android:layout_height="146dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/tvSeparator"
+            app:layout_constraintTop_toBottomOf="@+id/radiogroup1">
+
+            <RadioButton
+                android:id="@+id/full4g"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:padding="5dp"
+                android:text="@string/laccid4g" />
+
+            <RadioButton
+                android:id="@+id/lacenb4g"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:padding="5dp"
+                android:text="@string/lacenb4g" />
+
+            <RadioButton
+                android:id="@+id/enb4g"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:padding="5dp"
+                android:text="@string/enbonly4g" />
+
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/tvSeparator2"
+            android:layout_width="93dp"
+            android:layout_height="41dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="15dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/t4gformat_txt"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvSeparator" />
+
+        <RadioGroup
+            android:id="@+id/radiogroup3"
+            android:layout_width="292dp"
+            android:layout_height="41dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="10dp"
+
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/tvSeparator3"
+            app:layout_constraintTop_toBottomOf="@+id/radiogroup2">
+
+            <!--android:onClick="checkradio"-->
+            <RadioButton
+                android:id="@+id/r3gdef"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="@string/tdefault" />
+
+            <RadioButton
+                android:id="@+id/r3gall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
+                android:paddingEnd="20dp"
+                android:text="@string/allband" />
+
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/tvSeparator3"
+            android:layout_width="93dp"
+            android:layout_height="41dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="120dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/t3gband"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvSeparator2" />
+
+        <TextView
+            android:id="@+id/tvSeparator4"
+            android:layout_width="93dp"
+            android:layout_height="41dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="15dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/t2gband"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvSeparator3" />
+
+        <RadioGroup
+            android:id="@+id/radiogroup4"
+            android:layout_width="292dp"
+            android:layout_height="41dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="10dp"
+
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/tvSeparator4"
+            app:layout_constraintTop_toBottomOf="@+id/radiogroup3">
+
+            <!--android:onClick="checkradio"-->
+            <RadioButton
+                android:id="@+id/r2gdef"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="@string/tdefault" />
+
+            <RadioButton
+                android:id="@+id/r2gall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
+                android:paddingEnd="20dp"
+                android:text="@string/allband" />
+
+        </RadioGroup>
+
         <Button
             android:id="@+id/button2"
             android:layout_width="337dp"
@@ -87,7 +229,7 @@
             android:text="Read to Text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/radiogroup1" />
+            app:layout_constraintTop_toBottomOf="@+id/radiogroup4" />
 
         <EditText
             android:id="@+id/editTextTextMultiLine"

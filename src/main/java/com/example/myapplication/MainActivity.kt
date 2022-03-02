@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private val requestcode = 111
     private var nettextdata = ""
     private var radioGroup: RadioGroup? = null
+    private var radioGroup2: RadioGroup? = null
     private var radioButton: RadioButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         radioGroup = findViewById(R.id.radiogroup1)
+        radioGroup2 = findViewById(R.id.radiogroup2)
 
         txtv1 = findViewById(R.id.textInputEditText)
         txt1 = findViewById(R.id.editTextTextMultiLine)
@@ -85,7 +87,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun readcsv() {
-        if (location != "") {
+        if (this.location != "") {
             // If you have access to the external storage, do whatever you need
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
                 if(!Environment.isExternalStorageManager()){
@@ -134,7 +136,9 @@ class MainActivity : AppCompatActivity() {
             var strout = ""
 
             val radioId = radioGroup!!.checkedRadioButtonId
+            val radioId2 = radioGroup2!!.checkedRadioButtonId
             var separator: String
+            var t4gformat: Int
 
             when(radioId){
                 R.id.radio_slash -> separator = "/"
@@ -142,6 +146,17 @@ class MainActivity : AppCompatActivity() {
                 else -> {
                     separator = "/"
                     radioButton = findViewById(R.id.radio_slash)
+                    radioButton!!.isChecked = true
+                }
+            }
+
+            when(radioId2){
+                R.id.full4g -> t4gformat = 0
+                R.id.lacenb4g -> t4gformat = 1
+                R.id.enb4g -> t4gformat = 2
+                else -> {
+                    t4gformat = 2
+                    radioButton = findViewById(R.id.enb4g)
                     radioButton!!.isChecked = true
                 }
             }
@@ -194,35 +209,79 @@ class MainActivity : AppCompatActivity() {
                         4 -> str4g4
                         else -> continue
                     }
-                        /*if (simnum == 1) {
-                            strbuff = str4g1
-                        } else if (simnum == 2) {
-                            strbuff = str4g2
-                        } else if (simnum == 3) {
-                            strbuff = str4g3
-                        } else if (simnum == 4) {
-                            strbuff = str4g4
-                        } else {
-                            continue
-                        }*/
 
-                    var ci = Integer.toHexString((splitted[3].toInt()))
-                    cid = ci.toString().takeLast(2).toLong(radix = 16).toString() // int(ci[-2:],16)
-                    lac = ci.toString().take(ci.toString().length - 2).toLong(radix = 16).toString() // lac=int(ci[:-2],16)
-                    if (strbuff.indexOf(lac)>-1) {
-                        var find1 = strbuff.indexOf(lac)
-                        var strbackupf = strbuff.subSequence(0,find1) // strbuff.takeLast(find1+lac.length).toString()//strbuff[:find1]
-                        var strtemp = strbuff.subSequence(find1, strbuff.length)
-                        var find2 = strtemp.indexOf("\\")
-                        var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
-                        strtemp2 = strtemp2.toString() + separator + cid + "\\"
-                        strbuff = strbackupf.toString() + strtemp2
-                    } else {
-                        strbuff = if (strbuff.isNotEmpty()) {
-                            "$strbuff\n   $lac-$cid\\"
+                    if(t4gformat==0){
+                        lac = splitted[2]
+                        cid = splitted[3]
+                        if (lac in strbuff) {
+                            var find1 = strbuff.indexOf(lac)
+                            var strbackupf = strbuff.subSequence(0, find1) // [:find1]
+                            var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
+                            var find2 = strtemp.indexOf("\\")
+                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                            // strbackupe = strtemp[find2:]
+                            strtemp2 = strtemp2.toString() + separator + cid + "\\"
+                            strbuff = strbackupf.toString() + strtemp2 // + strbackupe
                         } else {
-                            "4G:$lac-$cid\\"
+                            strbuff = if (strbuff.isNotEmpty()) {
+                                "$strbuff\n   $lac-$cid\\"
+                            } else {
+                                strbuff + "4G:" + lac + "-" + cid + "\\"
+                            }
                         }
+                    }else if (t4gformat==1){
+                        var enb = Integer.toHexString((splitted[3].toInt()))
+                        var ci = enb.toString().takeLast(2).toLong(radix = 16).toString() // int(ci[-2:],16)
+                        cid = enb.toString().take(enb.toString().length - 2).toLong(radix = 16).toString() // lac=int(ci[:-2],16)enb.toString().takeLast(2).toLong(radix = 16).toString()
+                        lac = splitted[2]
+                        /*if (strbuff.indexOf(lac)>-1) {*/
+                        if (lac in strbuff){
+                            if (cid in strbuff){
+                                var find1 = strbuff.indexOf(cid)
+                                var strbackupf = strbuff.subSequence(0,find1) // strbuff.takeLast(find1+lac.length).toString()//strbuff[:find1]
+                                var strtemp = strbuff.subSequence(find1, strbuff.length)
+                                var find2 = strtemp.indexOf("\\")
+                                var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                                strtemp2 = strtemp2.toString() + separator + ci + "\\"
+                                strbuff = strbackupf.toString() + strtemp2
+                            }else{
+                                var find1 = strbuff.indexOf(lac)
+                                var strbackupf = strbuff.subSequence(0,find1) // strbuff.takeLast(find1+lac.length).toString()//strbuff[:find1]
+                                var strtemp = strbuff.subSequence(find1, strbuff.length)
+                                var find2 = strtemp.indexOf("\\")
+                                var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                                strtemp2 = strtemp2.toString() + "||" + cid + "-" + ci + "\\"
+                                strbuff = strbackupf.toString() + strtemp2
+                            }
+                        }else{
+                            strbuff = if (strbuff.isNotEmpty()) {
+                                "$strbuff\n   $lac-$cid-$ci\\"
+                            } else {
+                                "4G:$lac-$cid-$ci\\"
+                            }
+                        }
+                    }else if (t4gformat==2){
+                        var enb = Integer.toHexString((splitted[3].toInt()))
+                        cid = enb.toString().takeLast(2).toLong(radix = 16).toString() // int(ci[-2:],16)
+                        lac = enb.toString().take(enb.toString().length - 2).toLong(radix = 16).toString() // lac=int(ci[:-2],16)
+                        /*if (strbuff.indexOf(lac)>-1) {*/
+                        if (lac in strbuff){
+                            var find1 = strbuff.indexOf(lac)
+                            var strbackupf = strbuff.subSequence(0,find1) // strbuff.takeLast(find1+lac.length).toString()//strbuff[:find1]
+                            var strtemp = strbuff.subSequence(find1, strbuff.length)
+                            var find2 = strtemp.indexOf("\\")
+                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                            strtemp2 = strtemp2.toString() + separator + cid + "\\"
+                            strbuff = strbackupf.toString() + strtemp2
+                        } else {
+                            strbuff = if (strbuff.isNotEmpty()) {
+                                "$strbuff\n   $lac-$cid\\"
+                            } else {
+                                "4G:$lac-$cid\\"
+                            }
+                        }
+                    }else{
+                        continue
                     }
 
                     when(simnum){
@@ -232,25 +291,10 @@ class MainActivity : AppCompatActivity() {
                         4 -> str4g4 = strbuff
                         else -> continue
                     }
-                        /*if (simnum == 1) {
-                            str4g1 = strbuff
-                        } else if (simnum == 2) {
-                            str4g2 = strbuff
-                        } else if (simnum == 3) {
-                            str4g3 = strbuff
-                        } else if (simnum == 4) {
-                            str4g4 = strbuff
-                        } else {
-                            continue
-                        }*/
 
                     last_lac = splitted[2]
                     last_cid = splitted[3]
-                        /*println("sim1 =" + str4g1)
-                        println()
-                        println("sim2 =" + str4g2)
-                        println()
-                        println("sim3 =" + str4g3)*/
+
                 } else if (net_type == "2") {
                     var strbuff: String?
                     strbuff = when(simnum){
@@ -260,17 +304,6 @@ class MainActivity : AppCompatActivity() {
                         4 -> str3g4
                         else -> continue
                     }
-                        /*if (simnum == 1) {
-                            strbuff = str3g1
-                        } else if (simnum == 2) {
-                            strbuff = str3g2
-                        } else if (simnum == 3) {
-                            strbuff = str3g3
-                        } else if (simnum == 4) {
-                            strbuff = str3g4
-                        } else {
-                            continue
-                        }*/
 
                     lac = splitted[2]
                     cid = (splitted[3].toInt() % 65536).toString()
@@ -298,33 +331,11 @@ class MainActivity : AppCompatActivity() {
                         else -> continue
                     }
 
-                    /*if (simnum == 1) {
-                        str3g1 = strbuff
-                    } else if (simnum == 2) {
-                        str3g2 = strbuff
-                    } else if (simnum == 3) {
-                        str3g3 = strbuff
-                    } else if (simnum == 4) {
-                        str3g4 = strbuff
-                    } else {
-                        continue
-                    }*/
-
                     last_lac = splitted[2]
                     last_cid = splitted[3]
                 } else if (net_type == "3") {
                     var strbuff: String?
-                        /*if (simnum == 1) {
-                            strbuff = str2g1
-                        } else if (simnum == 2) {
-                            strbuff = str2g2
-                        } else if (simnum == 3) {
-                            strbuff = str2g3
-                        } else if (simnum == 4) {
-                            strbuff = str2g4
-                        } else {
-                            continue
-                        }*/
+
                     strbuff = when(simnum){
                         1 -> str2g1
                         2 -> str2g2
@@ -359,17 +370,6 @@ class MainActivity : AppCompatActivity() {
                         4 -> str2g4 = strbuff
                         else -> continue
                     }
-                        /*if (simnum == 1) {
-                            str2g1 = strbuff
-                        } else if (simnum == 2) {
-                            str2g2 = strbuff
-                        } else if (simnum == 3) {
-                            str2g3 = strbuff
-                        } else if (simnum == 4) {
-                            str2g4 = strbuff
-                        } else {
-                            continue
-                        }*/
 
                     last_lac = splitted[2]
                     last_cid = splitted[3]
