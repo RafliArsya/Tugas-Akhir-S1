@@ -11,4 +11,5 @@
     <string name="t2gband">2G Band</string>
     <string name="tdefault">Default</string>
     <string name="allband">All bands</string>
+    <string name="tconvertmc">Convert to MC</string>
 </resources>

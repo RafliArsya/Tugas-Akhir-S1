@@ -24,10 +24,16 @@ class MainActivity : AppCompatActivity() {
     private var txtv1: TextView? = null
     private var txt1: EditText? = null
     private var location = ""
+    private val alpha = listOf(1, 4, 7)
+    private val beta = listOf(2, 5, 8)
+    private val gamma = listOf(3, 6, 9)
+    private var sector = listOf(alpha, beta, gamma)
     private val requestcode = 111
     private var nettextdata = ""
     private var radioGroup: RadioGroup? = null
     private var radioGroup2: RadioGroup? = null
+    private var radioGroup3: RadioGroup? = null
+    private var radioGroup4: RadioGroup? = null
     private var radioButton: RadioButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +42,8 @@ class MainActivity : AppCompatActivity() {
 
         radioGroup = findViewById(R.id.radiogroup1)
         radioGroup2 = findViewById(R.id.radiogroup2)
+        radioGroup3 = findViewById(R.id.radiogroup3)
+        radioGroup4 = findViewById(R.id.radiogroup4)
 
         txtv1 = findViewById(R.id.textInputEditText)
         txt1 = findViewById(R.id.editTextTextMultiLine)
@@ -137,8 +145,12 @@ class MainActivity : AppCompatActivity() {
 
             val radioId = radioGroup!!.checkedRadioButtonId
             val radioId2 = radioGroup2!!.checkedRadioButtonId
+            val radioId3 = radioGroup3!!.checkedRadioButtonId
+            val radioId4 = radioGroup4!!.checkedRadioButtonId
             var separator: String
             var t4gformat: Int
+            var t2gband: Int
+            var t3gband: Int
 
             when(radioId){
                 R.id.radio_slash -> separator = "/"
@@ -157,6 +169,26 @@ class MainActivity : AppCompatActivity() {
                 else -> {
                     t4gformat = 2
                     radioButton = findViewById(R.id.enb4g)
+                    radioButton!!.isChecked = true
+                }
+            }
+
+            when(radioId3){
+                R.id.r3gdef -> t3gband = 0
+                R.id.r3gall -> t3gband = 1
+                else -> {
+                    t3gband = 0
+                    radioButton = findViewById(R.id.r3gdef)
+                    radioButton!!.isChecked = true
+                }
+            }
+
+            when(radioId4){
+                R.id.r2gdef -> t2gband = 0
+                R.id.r2gall -> t2gband = 1
+                else -> {
+                    t2gband = 0
+                    radioButton = findViewById(R.id.r2gdef)
                     radioButton!!.isChecked = true
                 }
             }
@@ -229,7 +261,8 @@ class MainActivity : AppCompatActivity() {
                                 strbuff + "4G:" + lac + "-" + cid + "\\"
                             }
                         }
-                    }else if (t4gformat==1){
+                    }
+                    else if (t4gformat==1){
                         var enb = Integer.toHexString((splitted[3].toInt()))
                         var ci = enb.toString().takeLast(2).toLong(radix = 16).toString() // int(ci[-2:],16)
                         cid = enb.toString().take(enb.toString().length - 2).toLong(radix = 16).toString() // lac=int(ci[:-2],16)enb.toString().takeLast(2).toLong(radix = 16).toString()
@@ -250,7 +283,7 @@ class MainActivity : AppCompatActivity() {
                                 var strtemp = strbuff.subSequence(find1, strbuff.length)
                                 var find2 = strtemp.indexOf("\\")
                                 var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
-                                strtemp2 = strtemp2.toString() + "||" + cid + "-" + ci + "\\"
+                                strtemp2 = strtemp2.toString() + separator + cid + "-" + ci + "\\"//strtemp2.toString() + "||" + cid + "-" + ci + "\\"
                                 strbuff = strbackupf.toString() + strtemp2
                             }
                         }else{
@@ -260,7 +293,8 @@ class MainActivity : AppCompatActivity() {
                                 "4G:$lac-$cid-$ci\\"
                             }
                         }
-                    }else if (t4gformat==2){
+                    }
+                    else if (t4gformat==2){
                         var enb = Integer.toHexString((splitted[3].toInt()))
                         cid = enb.toString().takeLast(2).toLong(radix = 16).toString() // int(ci[-2:],16)
                         lac = enb.toString().take(enb.toString().length - 2).toLong(radix = 16).toString() // lac=int(ci[:-2],16)
@@ -280,7 +314,8 @@ class MainActivity : AppCompatActivity() {
                                 "4G:$lac-$cid\\"
                             }
                         }
-                    }else{
+                    }
+                    else{
                         continue
                     }
 
@@ -307,21 +342,102 @@ class MainActivity : AppCompatActivity() {
 
                     lac = splitted[2]
                     cid = (splitted[3].toInt() % 65536).toString()
-                    if (lac in strbuff) {
-                        var find1 = strbuff.indexOf(lac)
-                        var strbackupf = strbuff.subSequence(0, find1) // strbuff[:find1]
-                        var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
-                        var find2 = strtemp.indexOf("\\")
-                        var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
-                        strtemp2 = strtemp2.toString() + separator + cid + "\\"
-                        strbuff = strbackupf.toString() + strtemp2
-                    } else {
-                        strbuff = if (strbuff.isNotEmpty()) {
-                            "$strbuff\n   $lac-$cid\\"
+                    if(t3gband==1){
+                        var cidsecband = getSector(cid)
+                        var cid1: String
+                        var cid2: String
+                        when(cidsecband[1]){
+                            0->{
+                                cid1 = cid.take(cid.length-1) + sector[cidsecband[0]][1]
+                                cid2 = cid.take(cid.length-1) + sector[cidsecband[0]][2]
+                            }
+                            1->{
+                                cid1 = cid.take(cid.length-1) + sector[cidsecband[0]][0]
+                                cid2 = cid.take(cid.length-1) + sector[cidsecband[0]][2]
+                            }
+                            2->{
+                                cid1 = cid.take(cid.length-1) + sector[cidsecband[0]][0]
+                                cid2 = cid.take(cid.length-1) + sector[cidsecband[0]][1]
+                            }
+                            else -> {
+                                continue
+                            }
+                        }
+                        if (lac in strbuff) {
+                            if (cid in strbuff || cid1 in strbuff || cid2 in strbuff){
+                                continue
+                            }
+                            var find1 = strbuff.indexOf(lac)
+                            var strbackupf = strbuff.subSequence(0, find1) // strbuff[:find1]
+                            var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
+                            var find2 = strtemp.indexOf("\\")
+                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                            strtemp2 = when(cidsecband[1]){
+                                0->{
+                                    strtemp2.toString() + separator + cid + separator + cid1 + separator + cid2 + "\\"
+                                }
+                                1->{
+                                    strtemp2.toString() + separator + cid1 + separator + cid + separator + cid2 + "\\"
+                                }
+                                2->{
+                                    strtemp2.toString() + separator + cid1 + separator + cid2 + separator + cid + "\\"
+                                }
+                                else -> {
+                                    continue
+                                }
+                            }
+                            strbuff = strbackupf.toString() + strtemp2
                         } else {
-                            strbuff + "3G:" + lac + "-" + cid + "\\"
+                            strbuff = if (strbuff.isNotEmpty()) {
+                                when(cidsecband[1]){
+                                    0->{
+                                        "$strbuff\n   $lac-$cid$separator$cid1$separator$cid2\\"
+                                    }
+                                    1->{
+                                        "$strbuff\n   $lac-$cid1$separator$cid$separator$cid2\\"
+                                    }
+                                    2->{
+                                        "$strbuff\n   $lac-$cid1$separator$cid2$separator$cid\\"
+                                    }
+                                    else ->{
+                                        continue
+                                    }
+                                }
+                            } else {
+                                when(cidsecband[1]){
+                                    0->{
+                                        strbuff + "3G:" + lac + "-" + cid + separator + cid1 + separator + cid2 + "\\"
+                                    }
+                                    1->{
+                                        strbuff + "3G:" + lac + "-" + cid1 + separator + cid + separator + cid2 + "\\"
+                                    }
+                                    2->{
+                                        strbuff + "3G:" + lac + "-" + cid1 + separator + cid2 + separator + cid + "\\"
+                                    }
+                                    else ->{
+                                        continue
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        if (lac in strbuff) {
+                            var find1 = strbuff.indexOf(lac)
+                            var strbackupf = strbuff.subSequence(0, find1) // strbuff[:find1]
+                            var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
+                            var find2 = strtemp.indexOf("\\")
+                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                            strtemp2 = strtemp2.toString() + separator + cid + "\\"
+                            strbuff = strbackupf.toString() + strtemp2
+                        } else {
+                            strbuff = if (strbuff.isNotEmpty()) {
+                                "$strbuff\n   $lac-$cid\\"
+                            } else {
+                                strbuff + "3G:" + lac + "-" + cid + "\\"
+                            }
                         }
                     }
+
 
                     when(simnum){
                         1 -> str3g1 = strbuff
@@ -346,20 +462,101 @@ class MainActivity : AppCompatActivity() {
 
                     lac = splitted[2]
                     cid = splitted[3]
-                    if (lac in strbuff) {
-                        var find1 = strbuff.indexOf(lac)
-                        var strbackupf = strbuff.subSequence(0, find1) // [:find1]
-                        var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
-                        var find2 = strtemp.indexOf("\\")
-                        var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                    if (t2gband==1) {
+                        var cidsecband = getSector(cid)
+                        var cid1: String
+                        var cid2: String
+                        when(cidsecband[1]){
+                            0->{
+                                cid1 = cid.take(cid.length-1) + sector[cidsecband[0]][1]
+                                cid2 = cid.take(cid.length-1) + sector[cidsecband[0]][2]
+                            }
+                            1->{
+                                cid1 = cid.take(cid.length-1) + sector[cidsecband[0]][0]
+                                cid2 = cid.take(cid.length-1) + sector[cidsecband[0]][2]
+                            }
+                            2->{
+                                cid1 = cid.take(cid.length-1) + sector[cidsecband[0]][0]
+                                cid2 = cid.take(cid.length-1) + sector[cidsecband[0]][1]
+                            }
+                            else -> {
+                                continue
+                            }
+                        }
+                        if (lac in strbuff) {
+                            if (cid in strbuff || cid1 in strbuff || cid2 in strbuff){
+                                continue
+                            }
+                            var find1 = strbuff.indexOf(lac)
+                            var strbackupf = strbuff.subSequence(0, find1) // [:find1]
+                            var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
+                            var find2 = strtemp.indexOf("\\")
+                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
                             // strbackupe = strtemp[find2:]
-                        strtemp2 = strtemp2.toString() + separator + cid + "\\"
-                        strbuff = strbackupf.toString() + strtemp2 // + strbackupe
-                    } else {
-                        strbuff = if (strbuff.isNotEmpty()) {
-                            "$strbuff\n   $lac-$cid\\"
+                            strtemp2 = when(cidsecband[1]){
+                                0->{
+                                    strtemp2.toString() + separator + cid + separator + cid1 + separator + cid2 + "\\"
+                                }
+                                1->{
+                                    strtemp2.toString() + separator + cid1 + separator + cid + separator + cid2 + "\\"
+                                }
+                                2->{
+                                    strtemp2.toString() + separator + cid1 + separator + cid2 + separator + cid + "\\"
+                                }
+                                else -> {
+                                    continue
+                                }
+                            }
+                            strbuff = strbackupf.toString() + strtemp2 // + strbackupe
                         } else {
-                            strbuff + "2G:" + lac + "-" + cid + "\\"
+                            strbuff = if (strbuff.isNotEmpty()) {
+                                when(cidsecband[1]){
+                                    0->{
+                                        "$strbuff\n   $lac-$cid$separator$cid1$separator$cid2\\"
+                                    }
+                                    1->{
+                                        "$strbuff\n   $lac-$cid1$separator$cid$separator$cid2\\"
+                                    }
+                                    2->{
+                                        "$strbuff\n   $lac-$cid1$separator$cid2$separator$cid\\"
+                                    }
+                                    else ->{
+                                        continue
+                                    }
+                                }
+                            } else {
+                                when(cidsecband[1]){
+                                    0->{
+                                        strbuff + "2G:" + lac + "-" + cid + separator + cid1 + separator + cid2 + "\\"
+                                    }
+                                    1->{
+                                        strbuff + "2G:" + lac + "-" + cid1 + separator + cid + separator + cid2 + "\\"
+                                    }
+                                    2->{
+                                        strbuff + "2G:" + lac + "-" + cid1 + separator + cid2 + separator + cid + "\\"
+                                    }
+                                    else ->{
+                                        continue
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        if (lac in strbuff) {
+                            var find1 = strbuff.indexOf(lac)
+                            var strbackupf = strbuff.subSequence(0, find1) // [:find1]
+                            var strtemp = strbuff.subSequence(find1, strbuff.length) // [find1:]
+                            var find2 = strtemp.indexOf("\\")
+                            var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
+                            // strbackupe = strtemp[find2:]
+                            strtemp2 = strtemp2.toString() + separator + cid + "\\"
+                            strbuff = strbackupf.toString() + strtemp2 // + strbackupe
+                        } else {
+                            strbuff = if (strbuff.isNotEmpty()) {
+                                "$strbuff\n   $lac-$cid\\"
+                            } else {
+                                strbuff + "2G:" + lac + "-" + cid + "\\"
+                            }
                         }
                     }
 
@@ -457,8 +654,23 @@ class MainActivity : AppCompatActivity() {
                 strout += "!!!Ada duplikasi data!!!"
             }
             strout = strout.trim()
+            nettextdata = strout
             txt1?.setText(strout)
         }
+    }
+
+    private fun getSector(cid: String): Array<Int> {
+        var index = -1
+        var index2 = -1
+        for (i in sector) {
+            for (j in i) {
+                if (cid.takeLast(1) == j.toString()) {
+                    index = sector.indexOf(i)
+                    index2 = i.indexOf(j)
+                }
+            }
+        }
+        return arrayOf(index, index2)
     }
 
     private fun isExternalStorageDocument(uri: Uri): Boolean {
@@ -468,4 +680,6 @@ class MainActivity : AppCompatActivity() {
     private fun isLetters(string: String): Boolean {
         return string.matches("^[a-zA-Z]*$".toRegex())
     }
+
+
 }

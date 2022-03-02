@@ -237,6 +237,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:ems="10"
+            android:maxLines="65535"
             android:gravity="start|top"
             android:inputType="textMultiLine"
             android:scrollbars="vertical"
@@ -249,7 +250,7 @@
             android:layout_width="337dp"
             android:layout_height="50dp"
             android:layout_marginTop="40dp"
-            android:text="Read to Text[4G Format]"
+            android:text="@string/tconvertmc"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editTextTextMultiLine" />
@@ -266,54 +267,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/button3" />
-
-        <Button
-            android:id="@+id/button4"
-            android:layout_width="337dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="40dp"
-            android:text="Convert to MC"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editTextTextMultiLine2" />
-
-        <EditText
-            android:id="@+id/editTextTextMultiLine3"
-            android:layout_width="341dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="textMultiLine"
-            android:scrollbars="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button4" />
-
-        <Button
-            android:id="@+id/button5"
-            android:layout_width="337dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="40dp"
-            android:text="Convert to MC[4G]"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editTextTextMultiLine3" />
-
-        <EditText
-            android:id="@+id/editTextTextMultiLine4"
-            android:layout_width="341dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="textMultiLine"
-            android:scrollbars="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button5" />
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
