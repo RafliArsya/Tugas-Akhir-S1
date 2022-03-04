@@ -15,14 +15,18 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import java.util.*
+
 /*import android.widget.Toast
 import android.view.View*/
 
 class MainActivity : AppCompatActivity() {
     private var btn1: Button? = null
     private var btn2: Button? = null
+    private var btn3: Button? = null
     private var txtv1: TextView? = null
     private var txt1: EditText? = null
+    private var txt2: EditText? = null
     private var location = ""
     private val alpha = listOf(1, 4, 7)
     private val beta = listOf(2, 5, 8)
@@ -34,7 +38,14 @@ class MainActivity : AppCompatActivity() {
     private var radioGroup2: RadioGroup? = null
     private var radioGroup3: RadioGroup? = null
     private var radioGroup4: RadioGroup? = null
+    private var radioGroup5: RadioGroup? = null
     private var radioButton: RadioButton? = null
+    private var mcc = ""
+    private var provider_list = listOf("Telkomsel","Simpati", "ISAT", "INDOSAT",
+        "XL", "AXIS", "THREE", "TRI")
+    private var netid = listOf("10","01","11","89","09")
+    private var netlist = listOf("4G", "3G", "2G")
+    private lateinit var separator: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,9 +55,11 @@ class MainActivity : AppCompatActivity() {
         radioGroup2 = findViewById(R.id.radiogroup2)
         radioGroup3 = findViewById(R.id.radiogroup3)
         radioGroup4 = findViewById(R.id.radiogroup4)
+        radioGroup5 = findViewById(R.id.radiogroup5)
 
         txtv1 = findViewById(R.id.textInputEditText)
         txt1 = findViewById(R.id.editTextTextMultiLine)
+        txt2 = findViewById(R.id.editTextTextMultiLine2)
         btn1 = findViewById(R.id.button)
         btn1!!.setOnClickListener {
             val intent = Intent()
@@ -57,6 +70,10 @@ class MainActivity : AppCompatActivity() {
         btn2 = findViewById(R.id.button2)
         btn2!!.setOnClickListener{
             readcsv()
+        }
+        btn3 = findViewById(R.id.button3)
+        btn3!!.setOnClickListener{
+            convertmc()
         }
     }
 
@@ -123,8 +140,6 @@ class MainActivity : AppCompatActivity() {
             var str2g3 = ""
             var str2g4 = ""
 
-            var mcc = ""
-
             var mnc1 = ""
             var mnc2 = ""
             var mnc3 = ""
@@ -147,7 +162,7 @@ class MainActivity : AppCompatActivity() {
             val radioId2 = radioGroup2!!.checkedRadioButtonId
             val radioId3 = radioGroup3!!.checkedRadioButtonId
             val radioId4 = radioGroup4!!.checkedRadioButtonId
-            var separator: String
+
             var t4gformat: Int
             var t2gband: Int
             var t3gband: Int
@@ -283,7 +298,8 @@ class MainActivity : AppCompatActivity() {
                                 var strtemp = strbuff.subSequence(find1, strbuff.length)
                                 var find2 = strtemp.indexOf("\\")
                                 var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
-                                strtemp2 = strtemp2.toString() + separator + cid + "-" + ci + "\\"//strtemp2.toString() + "||" + cid + "-" + ci + "\\"
+                                strtemp2 =
+                                    "$strtemp2$separator$cid-$ci\\"//strtemp2.toString() + "||" + cid + "-" + ci + "\\"
                                 strbuff = strbackupf.toString() + strtemp2
                             }
                         }else{
@@ -329,7 +345,6 @@ class MainActivity : AppCompatActivity() {
 
                     last_lac = splitted[2]
                     last_cid = splitted[3]
-
                 } else if (net_type == "2") {
                     var strbuff: String?
                     strbuff = when(simnum){
@@ -656,6 +671,149 @@ class MainActivity : AppCompatActivity() {
             strout = strout.trim()
             nettextdata = strout
             txt1?.setText(strout)
+        }
+    }
+
+    private fun convertmc(){
+        if (nettextdata.isEmpty() || txt1!!.text.isNullOrEmpty() || mcc.isEmpty()){
+            return
+        }
+        if (nettextdata != txt1!!.text.toString()){
+            nettextdata = txt1!!.text.toString()
+        }
+        val radioId5 = radioGroup5!!.checkedRadioButtonId
+        var skip_4g: Boolean
+        when(radioId5){
+            R.id.r4gmcno -> skip_4g = true
+            R.id.r4gmcyes -> skip_4g = false
+            else -> {
+                skip_4g = true
+                radioButton = findViewById(R.id.r4gmcno)
+                radioButton!!.isChecked = true
+            }
+        }
+        var stringout = ""
+        var provider: String
+        var net_id = ""
+        var net_type = ""
+        var nettextdatalower = nettextdata.lowercase()
+        var nettextdatalist = nettextdatalower.lineSequence()
+        var count = 0
+        mainloop@for (line in nettextdatalist){
+            if (line.isEmpty()){
+                continue
+            }
+            if ("!" in line){
+                continue
+            }
+            count += 1
+            for (pl in provider_list){
+                if (pl.lowercase() in line){
+                    var pl_index = provider_list.indexOf(pl)
+                    when(pl_index){
+                        0 -> {
+                            provider = provider_list[0].uppercase()
+                            net_id = netid[0]
+                            stringout += "$provider\n"
+                        }
+                        1 -> {
+                            provider = provider_list[0].uppercase()
+                            net_id = netid[0]
+                            stringout += "$provider\n"
+                        }
+                        2 -> {
+                            provider = provider_list[3].uppercase()
+                            net_id = netid[1]
+                            stringout += "$provider\n"
+                        }
+                        3 -> {
+                            provider = provider_list[3].uppercase()
+                            net_id = netid[1]
+                            stringout += "$provider\n"
+                        }
+                        4 -> {
+                            provider =  provider_list[4].uppercase()
+                            net_id = netid[2]
+                            stringout += "$provider\n"
+                        }
+                        5 -> {
+                            provider = provider_list[4].uppercase()
+                            net_id = netid[2]
+                            stringout += "$provider\n"
+                        }
+                        6 -> {
+                            provider = provider_list[6].uppercase()
+                            net_id = netid[3]
+                            stringout += "$provider\n"
+                        }
+                        7 -> {
+                            provider = provider_list[6].uppercase()
+                            net_id = netid[3]
+                            stringout += "$provider\n"
+                        }
+                    }
+                    continue@mainloop
+                }
+            }
+
+            for (nl in netlist){
+                if (nl.lowercase() in line){
+                    var nl_index = netlist.indexOf(nl)
+                    when(nl_index){
+                        0 -> {
+                            net_type = netlist[nl_index]
+                            break
+                        }
+                        1 -> {
+                            net_type = netlist[nl_index]
+                            break
+                        }
+                        2 -> {
+                            net_type = netlist[nl_index]
+                            break
+                        }
+                        else -> {
+                            break
+                        }
+                    }
+                }
+            }
+            if (net_type == "4G" && skip_4g) {
+                continue
+            }
+            var s_tmp = line
+            if(":" in line){
+                var a_idx = line.indexOf(":")
+                s_tmp = s_tmp.substring(a_idx+1)
+            }
+            s_tmp = s_tmp.replace(" ","")
+            if(separator in s_tmp || "|" in s_tmp){
+                var stripped = s_tmp.split('-')
+                var splitted = stripped[1].split(separator)
+                var last_cid = ""
+                for (n in splitted){
+                    var nd = n.replace("\n","")
+                    //stringout = stringout + nd
+                    stringout = if (nd.length==1){
+                        var idx_lastcid = last_cid.length
+                        stringout + mcc + "-" + net_id + "-" + stripped[0] + "-" + last_cid.substring(0, idx_lastcid-1) + nd + "\n"
+                    }else{
+                        stringout + mcc + "-" + net_id + "-" + stripped[0] + "-" + nd + "\n"
+                    }
+                    last_cid = nd
+                }
+            }else{
+                stringout = "$stringout$mcc-$net_id-$s_tmp\n"
+            }
+            //stringout += "$line\n"
+
+            /*if (count > 2){
+                break
+            }*/
+        }
+
+        if (stringout.isNotEmpty()){
+            txt2?.setText(stringout)
         }
     }
 

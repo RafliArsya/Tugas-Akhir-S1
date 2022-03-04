@@ -12,4 +12,7 @@
     <string name="tdefault">Default</string>
     <string name="allband">All bands</string>
     <string name="tconvertmc">Convert to MC</string>
+    <string name="t4gmc">4G</string>
+    <string name="tYes">Yes</string>
+    <string name="tNo">No</string>
 </resources>
