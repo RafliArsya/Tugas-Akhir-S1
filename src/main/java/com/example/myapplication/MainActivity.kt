@@ -41,9 +41,9 @@ class MainActivity : AppCompatActivity() {
     private var radioGroup5: RadioGroup? = null
     private var radioButton: RadioButton? = null
     private var mcc = ""
-    private var provider_list = listOf("Telkomsel","Simpati", "ISAT", "INDOSAT",
-        "XL", "AXIS", "THREE", "TRI")
-    private var netid = listOf("10","01","11","89","09")
+    private var provider_list = listOf("(10)Telkomsel","(10)Simpati","(21)INDOSAT", "(01)ISAT", "(01)INDOSAT",
+        "(11)XL", "(11)AXIS", "(89)THREE", "(89)TRI")
+    private var netid = listOf("10","01","11","89","09","21")
     private var netlist = listOf("4G", "3G", "2G")
     private lateinit var separator: String
 
@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         btn1 = findViewById(R.id.button)
         btn1!!.setOnClickListener {
             val intent = Intent()
-                .setType("*/*")
+                .setType("text/*")
                 .setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select a file"), requestcode)
         }
@@ -91,6 +91,9 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == requestcode && resultCode == RESULT_OK) {
             val selectedFile = data?.data //The uri with the location of the file
             Log.d("load", selectedFile.toString())
+            if (!selectedFile.toString().endsWith(".csv")) {
+                return
+            }
             if (isExternalStorageDocument(selectedFile!!)){
                 val docId = DocumentsContract.getDocumentId(selectedFile)
                 val split = docId.split(":").toTypedArray()
@@ -594,16 +597,19 @@ class MainActivity : AppCompatActivity() {
                 strsim1 = strsim1.replace("\\", "")
                 when (mnc1) {
                     "01" -> {
-                        strout += "INDOSAT\n"
+                        strout += "(01)INDOSAT\n"
                     }
                     "10" -> {
-                        strout += "TELKOMSEL\n"
+                        strout += "(10)TELKOMSEL\n"
                     }
                     "11" -> {
-                        strout += "XL\n"
+                        strout += "(11)XL\n"
                     }
                     "89" -> {
-                        strout += "THREE\n"
+                        strout += "(89)THREE\n"
+                    }
+                    "21"->{
+                        strout += "(21)INDOSAT\n"
                     }
                 }
                 strout += strsim1
@@ -613,16 +619,19 @@ class MainActivity : AppCompatActivity() {
                 strsim2 = strsim2.replace("\\", "")
                 when (mnc2) {
                     "01" -> {
-                        strout += "INDOSAT\n"
+                        strout += "(01)INDOSAT\n"
                     }
                     "10" -> {
-                        strout += "TELKOMSEL\n"
+                        strout += "(10)TELKOMSEL\n"
                     }
                     "11" -> {
-                        strout += "XL\n"
+                        strout += "(11)XL\n"
                     }
                     "89" -> {
-                        strout += "THREE\n"
+                        strout += "(89)THREE\n"
+                    }
+                    "21"->{
+                        strout += "(21)INDOSAT\n"
                     }
                 }
                 strout += strsim2
@@ -632,16 +641,19 @@ class MainActivity : AppCompatActivity() {
                 strsim3 = strsim3.replace("\\", "")
                 when (mnc3) {
                     "01" -> {
-                        strout += "INDOSAT\n"
+                        strout += "(01)INDOSAT\n"
                     }
                     "10" -> {
-                        strout += "TELKOMSEL\n"
+                        strout += "(10)TELKOMSEL\n"
                     }
                     "11" -> {
-                        strout += "XL\n"
+                        strout += "(11)XL\n"
                     }
                     "89" -> {
-                        strout += "THREE\n"
+                        strout += "(89)THREE\n"
+                    }
+                    "21"->{
+                        strout += "(21)INDOSAT\n"
                     }
                 }
                 strout += strsim3
@@ -651,16 +663,19 @@ class MainActivity : AppCompatActivity() {
                 strsim4 = strsim4.replace("\\", "")
                 when (mnc4) {
                     "01" -> {
-                        strout += "INDOSAT\n"
+                        strout += "(01)INDOSAT\n"
                     }
                     "10" -> {
-                        strout += "TELKOMSEL\n"
+                        strout += "(10)TELKOMSEL\n"
                     }
                     "11" -> {
-                        strout += "XL\n"
+                        strout += "(11)XL\n"
                     }
                     "89" -> {
-                        strout += "THREE\n"
+                        strout += "(89)THREE\n"
+                    }
+                    "21"->{
+                        strout += "(21)INDOSAT\n"
                     }
                 }
                 strout += strsim4
@@ -706,9 +721,15 @@ class MainActivity : AppCompatActivity() {
             if ("!" in line){
                 continue
             }
+            if ("tkp" in line){
+                stringout=stringout+line.uppercase()+"\n";
+                continue
+            }
             count += 1
             for (pl in provider_list){
-                if (pl.lowercase() in line){
+                var pl_regex = Regex("\\(\\d*?\\)")
+                var pl_sval = pl_regex.find(pl)?.value.toString()
+                if(pl_sval in line){
                     var pl_index = provider_list.indexOf(pl)
                     when(pl_index){
                         0 -> {
@@ -722,37 +743,96 @@ class MainActivity : AppCompatActivity() {
                             stringout += "$provider\n"
                         }
                         2 -> {
-                            provider = provider_list[3].uppercase()
-                            net_id = netid[1]
+                            provider = provider_list[2].uppercase()
+                            net_id = netid[5]
                             stringout += "$provider\n"
                         }
                         3 -> {
-                            provider = provider_list[3].uppercase()
+                            provider = provider_list[4].uppercase()
                             net_id = netid[1]
                             stringout += "$provider\n"
                         }
                         4 -> {
                             provider =  provider_list[4].uppercase()
-                            net_id = netid[2]
+                            net_id = netid[1]
                             stringout += "$provider\n"
                         }
                         5 -> {
-                            provider = provider_list[4].uppercase()
+                            provider = provider_list[5].uppercase()
                             net_id = netid[2]
                             stringout += "$provider\n"
                         }
                         6 -> {
-                            provider = provider_list[6].uppercase()
-                            net_id = netid[3]
+                            provider = provider_list[5].uppercase()
+                            net_id = netid[2]
                             stringout += "$provider\n"
                         }
                         7 -> {
-                            provider = provider_list[6].uppercase()
+                            provider = provider_list[7].uppercase()
+                            net_id = netid[3]
+                            stringout += "$provider\n"
+                        }
+                        8 -> {
+                            provider = provider_list[7].uppercase()
                             net_id = netid[3]
                             stringout += "$provider\n"
                         }
                     }
                     continue@mainloop
+                }else{
+                    pl_regex = Regex("[^()]*\$")
+                    var pl_sstring = pl_regex.find(pl)?.value.toString()
+                    if ( pl_sstring.lowercase() in line) {
+                        var pl_index = provider_list.indexOf(pl)
+                        when (pl_index) {
+                            0 -> {
+                                provider = provider_list[0].uppercase()
+                                net_id = netid[0]
+                                stringout += "$provider\n"
+                            }
+                            1 -> {
+                                provider = provider_list[0].uppercase()
+                                net_id = netid[0]
+                                stringout += "$provider\n"
+                            }
+                            2 -> {
+                                provider = provider_list[4].uppercase()
+                                net_id = netid[1]
+                                stringout += "$provider\n"
+                            }
+                            3 -> {
+                                provider = provider_list[4].uppercase()
+                                net_id = netid[1]
+                                stringout += "$provider\n"
+                            }
+                            4 -> {
+                                provider = provider_list[4].uppercase()
+                                net_id = netid[1]
+                                stringout += "$provider\n"
+                            }
+                            5 -> {
+                                provider = provider_list[5].uppercase()
+                                net_id = netid[2]
+                                stringout += "$provider\n"
+                            }
+                            6 -> {
+                                provider = provider_list[5].uppercase()
+                                net_id = netid[2]
+                                stringout += "$provider\n"
+                            }
+                            7 -> {
+                                provider = provider_list[7].uppercase()
+                                net_id = netid[3]
+                                stringout += "$provider\n"
+                            }
+                            8 -> {
+                                provider = provider_list[7].uppercase()
+                                net_id = netid[3]
+                                stringout += "$provider\n"
+                            }
+                        }
+                        continue@mainloop
+                    }
                 }
             }
 

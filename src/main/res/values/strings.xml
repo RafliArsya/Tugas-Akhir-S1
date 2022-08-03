@@ -4,8 +4,8 @@
     <string name="comma">Koma (,)</string>
     <string name="separator_txt">Separator</string>
     <string name="t4gformat_txt">4G Format</string>
-    <string name="laccid4g">LAC-CID</string>
-    <string name="lacenb4g">LAC-ENB-CI</string>
+    <string name="laccid4g">TAC-ECI</string>
+    <string name="lacenb4g">TAC-ENB-CI</string>
     <string name="enbonly4g">ENB-CI</string>
     <string name="t3gband">3G Band</string>
     <string name="t2gband">2G Band</string>
