@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -16,14 +17,36 @@ import android.util.Log
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import java.util.*
+import java.util.concurrent.TimeUnit
+import android.widget.Toast
 
-/*import android.widget.Toast
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
+import android.text.Layout
+import okhttp3.*
+
+import okhttp3.RequestBody
+import android.text.Spannable
+
+import android.text.style.AlignmentSpan
+import android.text.SpannableString
+import android.view.View
+import android.content.pm.PackageManager
+
+import androidx.core.content.ContextCompat
+import androidx.core.app.ActivityCompat
+
+/*import org.json.JSONObject
+import okhttp3.FormBody
+import android.widget.Toast
 import android.view.View*/
 
 class MainActivity : AppCompatActivity() {
+    private var isvalid = false
     private var btn1: Button? = null
     private var btn2: Button? = null
     private var btn3: Button? = null
+    //private var btn4: Button? = null
     private var txtv1: TextView? = null
     private var txt1: EditText? = null
     private var txt2: EditText? = null
@@ -40,12 +63,19 @@ class MainActivity : AppCompatActivity() {
     private var radioGroup4: RadioGroup? = null
     private var radioGroup5: RadioGroup? = null
     private var radioButton: RadioButton? = null
+    private var headerparizene = listOf("mcc", "mnc", "lac", "cid", "psc",
+        "cdma_latitude", "cdma_longitude", "was_current", "last_mentioned",
+        "network_type", "channel", "flags"
+    )
     private var mcc = ""
     private var provider_list = listOf("(10)Telkomsel","(10)Simpati","(21)INDOSAT", "(01)ISAT", "(01)INDOSAT",
         "(11)XL", "(11)AXIS", "(89)THREE", "(89)TRI")
     private var netid = listOf("10","01","11","89","09","21")
     private var netlist = listOf("4G", "3G", "2G")
     private lateinit var separator: String
+    lateinit var mToast: Toast
+    var toshow = -1
+    private var BASE_URL = "https://ap1.unwiredlabs.com/v2/process.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,10 +92,14 @@ class MainActivity : AppCompatActivity() {
         txt2 = findViewById(R.id.editTextTextMultiLine2)
         btn1 = findViewById(R.id.button)
         btn1!!.setOnClickListener {
-            val intent = Intent()
-                .setType("text/*")
-                .setAction(Intent.ACTION_GET_CONTENT)
-            startActivityForResult(Intent.createChooser(intent, "Select a file"), requestcode)
+            if(!checkPermission()){
+                requestPermission()
+            }else{
+                val intent = Intent()
+                    .setType("text/*")
+                    .setAction(Intent.ACTION_GET_CONTENT)
+                startActivityForResult(Intent.createChooser(intent, "Select a file"), requestcode)
+            }
         }
         btn2 = findViewById(R.id.button2)
         btn2!!.setOnClickListener{
@@ -74,6 +108,13 @@ class MainActivity : AppCompatActivity() {
         btn3 = findViewById(R.id.button3)
         btn3!!.setOnClickListener{
             convertmc()
+        }
+        /*btn4 = findViewById(R.id.button4)
+        btn4!!.setOnClickListener{
+                requestAsync()
+        }*/
+        if(!checkPermission()){
+            requestPermission()
         }
     }
 
@@ -92,6 +133,7 @@ class MainActivity : AppCompatActivity() {
             val selectedFile = data?.data //The uri with the location of the file
             Log.d("load", selectedFile.toString())
             if (!selectedFile.toString().endsWith(".csv")) {
+                MessageText("Format Dokumen Bukan CSV!")
                 return
             }
             if (isExternalStorageDocument(selectedFile!!)){
@@ -132,6 +174,7 @@ class MainActivity : AppCompatActivity() {
             var str4g2 = ""
             var str4g3 = ""
             var str4g4 = ""
+            isvalid = false
 
             var str3g1 = ""
             var str3g2 = ""
@@ -213,9 +256,35 @@ class MainActivity : AppCompatActivity() {
 
             var duplicate = false
             var count = 0 //dev only
-            val alllinez = allline.subList(1,allline.lastIndex)
+            val alllinez = allline.subList(0,allline.lastIndex+1)
+            //Log.d("LAST IDX", allline.lastIndex.toString())
+            //Log.d("ALLINEZ", alllinez.toString())
             for (perline in alllinez) {
+                //Log.d("debuging", perline)
                 count += 1 //dev only
+                if (count <= 1){
+                    //if (perline.equals("mcc,mnc,lac,cid,psc,cdma_latitude,cdma_longitude,was_current,last_mentioned,network_type,channel,flags")){
+                        //Log.d("debuging", "AAAA")
+                        //isvalid=true
+                    //}
+                    var idx = 0
+                    //Log.d("DEBUGME", perline)
+                    for (lines in perline.split(',')){
+                        //Log.d("DEBUG", headerparizene[idx])
+                        isvalid = true
+                        if(lines != headerparizene[idx]){
+                            isvalid = false
+                            break
+                        }
+                        idx++
+                    }
+                    if (!isvalid){
+                        this.location = ""
+                        txtv1!!.text = location
+                        MessageText("Header Tabel Salah/Tidak Sesuai.\n Mohon Cek Kembali!")
+                        break;
+                    }
+                }
                 var simnum: Int
                 if (perline.isEmpty()) {
                     continue
@@ -302,14 +371,14 @@ class MainActivity : AppCompatActivity() {
                                 var find2 = strtemp.indexOf("\\")
                                 var strtemp2 = strtemp.subSequence(0, find2) // [:find2]
                                 strtemp2 =
-                                    "$strtemp2$separator$cid-$ci\\"//strtemp2.toString() + "||" + cid + "-" + ci + "\\"
+                                    "$strtemp2$separator$cid.$ci\\"//strtemp2.toString() + "||" + cid + "-" + ci + "\\"
                                 strbuff = strbackupf.toString() + strtemp2
                             }
                         }else{
                             strbuff = if (strbuff.isNotEmpty()) {
-                                "$strbuff\n   $lac-$cid-$ci\\"
+                                "$strbuff\n   $lac-$cid.$ci\\"
                             } else {
-                                "4G:$lac-$cid-$ci\\"
+                                "4G:$lac-$cid.$ci\\"
                             }
                         }
                     }
@@ -686,11 +755,14 @@ class MainActivity : AppCompatActivity() {
             strout = strout.trim()
             nettextdata = strout
             txt1?.setText(strout)
+        }else{
+            MessageText("File belum dipilih atau data Kosong!")
         }
     }
 
     private fun convertmc(){
         if (nettextdata.isEmpty() || txt1!!.text.isNullOrEmpty() || mcc.isEmpty()){
+            MessageText("Text Box Read To Text Kosong!\n Mohon Cek Kembali!")
             return
         }
         if (nettextdata != txt1!!.text.toString()){
@@ -870,20 +942,46 @@ class MainActivity : AppCompatActivity() {
             if(separator in s_tmp || "|" in s_tmp){
                 var stripped = s_tmp.split('-')
                 var splitted = stripped[1].split(separator)
+                Log.d("debuging", splitted.toString())
                 var last_cid = ""
+                var containsEnb = false
+                var lastEnb = ""
                 for (n in splitted){
+                    Log.d("LAST CID", last_cid)
                     var nd = n.replace("\n","")
+                    nd = nd.replace(".", "-")
+                    if(containsEnb){
+                        var enb = nd.split("-")[0]
+                        if (enb != lastEnb){
+                            containsEnb = false
+                            lastEnb = ""
+                        }
+                    }
                     //stringout = stringout + nd
-                    stringout = if (nd.length==1){
+                    stringout = /*if (nd.length==1){
                         var idx_lastcid = last_cid.length
-                        stringout + mcc + "-" + net_id + "-" + stripped[0] + "-" + last_cid.substring(0, idx_lastcid-1) + nd + "\n"
+                        stringout + mcc + "-" + net_id + "-" + stripped[0] + "-" + last_cid.substring(0, idx_lastcid-1) + nd + "AAA" + "\n"
+                    }else*/ if (containsEnb){
+                        stringout + mcc + "-" + net_id + "-" + stripped[0] + "-" + lastEnb + "-" + nd + "\n"
                     }else{
                         stringout + mcc + "-" + net_id + "-" + stripped[0] + "-" + nd + "\n"
                     }
                     last_cid = nd
+                    if (containsEnb){
+                        containsEnb = false
+                        lastEnb = ""
+                    }
+                    if(n.contains(".")){
+                        containsEnb = true
+                        lastEnb = n.split(".")[0]
+                    }
                 }
             }else{
-                stringout = "$stringout$mcc-$net_id-$s_tmp\n"
+                stringout = if (s_tmp.contains(".")){
+                    var nd = s_tmp.replace(".", "-")
+                    "$stringout$mcc-$net_id-$nd\n"
+                }else
+                    "$stringout$mcc-$net_id-$s_tmp\n"
             }
             //stringout += "$line\n"
 
@@ -919,5 +1017,102 @@ class MainActivity : AppCompatActivity() {
         return string.matches("^[a-zA-Z]*$".toRegex())
     }
 
+    private fun requestAsync() {
+        val SDK_INT = Build.VERSION.SDK_INT
+        if (SDK_INT > 8) {
+            val policy = ThreadPolicy.Builder()
+                .permitAll().build()
+            StrictMode.setThreadPolicy(policy)
+        }
+        val builder = OkHttpClient.Builder()
+        builder.connectTimeout(5, TimeUnit.SECONDS)
+        builder.readTimeout(5, TimeUnit.SECONDS)
+        builder.writeTimeout(5, TimeUnit.SECONDS)
 
+        var token = "pk.96e78f56173f44de079da7fe9523270e"
+        var mcc = 510
+        var mnc = 21
+        var lac = 4774
+        var cid = 46814
+
+        var jtest = "{\"token\": \"$token\",\"radio\": \"gsm\",\"mcc\": $mcc,\"mnc\": $mnc,\"cells\": [{\"lac\": $lac,\"cid\": $cid}], \"address\": 1}"
+
+        val requestjson = RequestBody.create(
+            MediaType.parse("application/json"), jtest)
+
+        val client = builder.build()
+        val request = Request.Builder()
+            .url(BASE_URL)
+            .post(requestjson)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call?, e: IOException) {
+                Log.d("debuging", "Request Failed." + e.message)
+                responseAsync("Request Failed." + e.message)
+                e.printStackTrace()
+            }
+
+            @Throws(IOException::class)
+            override fun onResponse(call: Call, response: Response) {
+                try {
+                    if (response.isSuccessful) {
+                        val responseString = response.body()!!.string()
+                        Log.d("debuging", responseString)
+                        responseAsync(responseString)
+                    } else {
+                        Log.d("debuging", "Error $response")
+                        responseAsync("Error $response")
+                    }
+                } catch (e: IOException) {
+                    Log.d("debuging", "Exception caught : ", e)
+                    responseAsync("Error " + e.message)
+                }
+            }
+        })
+        Toast.makeText(this, "OkHTTP requestAsync", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun responseAsync(responseStr: String) {
+        runOnUiThread { Toast.makeText(applicationContext, responseStr, Toast.LENGTH_SHORT).show() }
+    }
+
+    private fun MessageText(responseStr: String) {
+        val text = responseStr
+        val centeredText: Spannable = SpannableString(text)
+        centeredText.setSpan(
+            AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
+            0, text.length - 1,
+            Spannable.SPAN_INCLUSIVE_INCLUSIVE
+        )
+        if (toshow==View.VISIBLE){
+            //Log.d("SYSTEM", mToast.view?.visibility.toString())
+            mToast.cancel()
+        }
+        mToast = Toast.makeText(applicationContext, centeredText, Toast.LENGTH_LONG)
+        //mToast.setText(centeredText)
+        mToast.show()
+        toshow = mToast.view?.visibility!!
+        /*runOnUiThread {
+            Toast.makeText(applicationContext, responseStr, Toast.LENGTH_LONG).show()
+        }*/
+    }
+
+    private fun checkPermission(): Boolean {
+        val result = ContextCompat.checkSelfPermission(
+            this@MainActivity,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        return if (result == PackageManager.PERMISSION_GRANTED) {
+            true
+        } else false
+    }
+
+    private fun requestPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+            requestcode
+        )
+    }
 }

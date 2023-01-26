@@ -312,13 +312,37 @@
             android:layout_marginTop="8dp"
             android:ems="10"
             android:gravity="start|top"
+            android:hint="Please delete any duplicate data first in order to use convert to MC"
             android:inputType="textMultiLine"
             android:scrollbars="vertical"
-            android:hint="Please delete any duplicate data first in order to use convert to MC"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/button3" />
 
+        <!--<Button
+            android:id="@+id/button4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editTextTextMultiLine2" />
+
+        <EditText
+            android:id="@+id/editTextTextMultiLine3"
+            android:layout_width="341dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:gravity="start|top"
+            android:hint="Please delete any duplicate data first in order to use convert to MC"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button4" />
+-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>
